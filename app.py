@@ -5,6 +5,7 @@ import os
 
 from modules.scam_dna import analyse_scam_dna
 from modules.language_support import detect_language
+from modules.risk_engine import calculate_risk
 
 st.set_page_config(
     page_title="ScamShield AI",
@@ -25,7 +26,7 @@ st.title("🛡️ ScamShield AI")
 st.subheader("Understand the scam. Before it catches you.")
 
 st.write(
-    "Your AI-powered digital safety companion."
+    "An AI-powered multilingual digital safety assistant."
 )
 
 message = st.text_area(
@@ -43,26 +44,8 @@ if st.button("Analyse Message", type="primary"):
         language = detect_language(message)
         dna = analyse_scam_dna(message)
 
-        st.divider()
-        st.header("📊 Message Analysis")
-
-        st.write(f"**Detected language:** {language}")
-
-        st.header("🔬 Scam DNA")
-
-        if dna["findings"]:
-            for finding in dna["findings"]:
-                st.warning(f"⚠️ {finding}")
-        else:
-            st.success("No known warning patterns detected.")
-
-        st.write(
-            f"Risk indicators identified: "
-            f"{dna['risk_indicators_count']}"
-        )
-
-        st.divider()
-        st.header("🤖 AI Detection")
+        prediction = None
+        probability = None
 
         if os.path.exists(MODEL_PATH):
             try:
@@ -73,33 +56,52 @@ if st.button("Analyse Message", type="primary"):
                 scam_index = list(model.classes_).index("scam")
                 probability = probabilities[scam_index] * 100
 
-                st.metric(
-                    "Estimated scam probability",
-                    f"{probability:.2f}%"
-                )
-
-                if prediction == "scam":
-                    st.error("Suspicious message pattern detected.")
-                else:
-                    st.success("No strong scam pattern detected.")
-
             except Exception:
-                st.error("The AI model could not analyse this message.")
+                st.warning("AI model could not analyse this message.")
 
+        risk = calculate_risk(
+            dna,
+            prediction,
+            probability
+        )
+
+        st.divider()
+        st.header("📊 Analysis Results")
+
+        st.write(f"**Detected language:** {language}")
+
+        st.subheader("🔬 Scam DNA")
+
+        if dna["findings"]:
+            for finding in dna["findings"]:
+                st.warning(f"⚠️ {finding}")
         else:
-            st.info(
-                "Machine-learning model integration is pending."
+            st.success("No known warning patterns detected.")
+
+        st.subheader("🛡️ Risk Assessment")
+
+        st.metric("Prototype risk score", f"{risk['score']}/100")
+        st.write(f"**Risk level:** {risk['level']}")
+        st.write(risk["explanation"])
+
+        if probability is not None:
+            st.metric(
+                "Model-estimated scam probability",
+                f"{probability:.2f}%"
             )
+        else:
+            st.info("Machine-learning model integration is pending.")
 
 st.divider()
+
 st.header("🔐 Digital Safety Centre")
 
 st.info(
     "Never share your OTP, UPI PIN or password. "
-    "Always independently verify suspicious messages."
+    "Verify important requests independently."
 )
 
 st.caption(
-    "Educational prototype. Language detection, "
-    "AI predictions and warning indicators can be incorrect."
+    "Educational prototype. Risk scores and AI predictions "
+    "are not proof of fraud or safety."
 )
