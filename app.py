@@ -4,6 +4,7 @@ import joblib
 import os
 
 from modules.scam_dna import analyse_scam_dna
+from modules.language_support import detect_language
 
 st.set_page_config(
     page_title="ScamShield AI",
@@ -24,11 +25,11 @@ st.title("🛡️ ScamShield AI")
 st.subheader("Understand the scam. Before it catches you.")
 
 st.write(
-    "An AI-powered multilingual digital safety assistant."
+    "Your AI-powered digital safety companion."
 )
 
 message = st.text_area(
-    "Paste a suspicious SMS message:",
+    "Paste your SMS message:",
     height=150,
     placeholder="Enter your message here..."
 )
@@ -39,26 +40,29 @@ if st.button("Analyse Message", type="primary"):
         st.warning("Please enter a message first.")
 
     else:
+        language = detect_language(message)
+        dna = analyse_scam_dna(message)
+
         st.divider()
-        st.header("🔬 Scam DNA Analysis")
+        st.header("📊 Message Analysis")
 
-        result = analyse_scam_dna(message)
+        st.write(f"**Detected language:** {language}")
 
-        if result["findings"]:
-            st.warning("Suspicious patterns found:")
+        st.header("🔬 Scam DNA")
 
-            for finding in result["findings"]:
-                st.write(f"⚠️ {finding}")
-
+        if dna["findings"]:
+            for finding in dna["findings"]:
+                st.warning(f"⚠️ {finding}")
         else:
             st.success("No known warning patterns detected.")
 
-        st.caption(
-            "These indicators are not proof of fraud."
+        st.write(
+            f"Risk indicators identified: "
+            f"{dna['risk_indicators_count']}"
         )
 
         st.divider()
-        st.header("🤖 AI Message Detection")
+        st.header("🤖 AI Detection")
 
         if os.path.exists(MODEL_PATH):
             try:
@@ -88,16 +92,14 @@ if st.button("Analyse Message", type="primary"):
             )
 
 st.divider()
-
 st.header("🔐 Digital Safety Centre")
 
 st.info(
     "Never share your OTP, UPI PIN or password. "
-    "Verify suspicious messages independently."
+    "Always independently verify suspicious messages."
 )
 
 st.caption(
-    "ScamShield AI is an educational prototype. "
-    "Its predictions and warning indicators can be incorrect."
+    "Educational prototype. Language detection, "
+    "AI predictions and warning indicators can be incorrect."
 )
-
