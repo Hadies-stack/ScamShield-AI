@@ -9,36 +9,53 @@ SCAM_PATTERNS = {
         r"within 24 hours",
         r"account.*blocked",
         r"turant",
-        r"abhi"
+        r"abhi",
+        r"तुरंत",
+        r"आज.*बंद",
+        r"जल्दी",
+        r"अभी"
     ],
+
     "Sensitive information request": [
         r"\botp\b",
         r"\bpin\b",
         r"password",
         r"bank details",
-        r"share.*details"
+        r"share.*details",
+        r"भेजें.*otp",
+        r"ओटीपी",
+        r"पासवर्ड",
+        r"पिन"
     ],
+
     "Payment pressure": [
         r"pay now",
         r"send money",
         r"processing fee",
         r"registration fee",
-        r"upi"
+        r"पैसे भेजें",
+        r"भुगतान करें"
     ],
+
     "Prize or reward claim": [
         r"you have won",
         r"lottery",
         r"prize",
         r"claim.*reward",
         r"inaam",
-        r"lakh.*jeet"
+        r"इनाम",
+        r"लॉटरी",
+        r"जीत"
     ],
+
     "Suspicious link language": [
         r"click.*link",
         r"verify.*link",
         r"bit\.ly",
         r"tinyurl",
-        r"http://"
+        r"http://",
+        r"लिंक पर क्लिक",
+        r"लिंक खोलें"
     ]
 }
 
