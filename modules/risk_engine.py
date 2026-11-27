@@ -1,12 +1,22 @@
 
+HIGH_RISK_INDICATORS = {
+    "Credential request",
+    "Remote access request",
+    "Threat or pressure"
+}
+
+
 def calculate_risk(scam_dna, prediction=None, scam_probability=None):
 
-    indicators = scam_dna.get("risk_indicators_count", 0)
+    findings = scam_dna.get("findings", [])
+    indicators = scam_dna.get("risk_indicators_count", len(findings))
 
-    # Start with transparent warning indicators
     score = min(indicators * 20, 60)
 
-    # Add supporting ML evidence when available
+    # High-impact warning patterns
+    if HIGH_RISK_INDICATORS.intersection(findings):
+        score = max(score, 60)
+
     if prediction == "scam" and scam_probability is not None:
         if scam_probability >= 80:
             score += 30
@@ -19,13 +29,13 @@ def calculate_risk(scam_dna, prediction=None, scam_probability=None):
 
     if score >= 60:
         level = "High"
-        explanation = "Several warning signals were identified."
+        explanation = "One or more high-impact warning patterns were identified."
     elif score >= 30:
         level = "Medium"
         explanation = "Some suspicious patterns were identified."
     else:
         level = "Low"
-        explanation = "Few known warning signals were identified."
+        explanation = "Few known warning patterns were identified."
 
     return {
         "score": score,

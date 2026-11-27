@@ -1,3 +1,4 @@
+
 import re
 
 SCAM_PATTERNS = {
@@ -7,51 +8,94 @@ SCAM_PATTERNS = {
         r"turant", r"abhi", r"तुरंत",
         r"आज.*बंद", r"जल्दी", r"अभी"
     ],
+
     "Sensitive information request": [
         r"\botp\b", r"\bpin\b", r"password",
         r"bank details", r"share.*details",
         r"भेजें.*otp", r"ओटीपी",
         r"पासवर्ड", r"पिन"
     ],
-    "Payment pressure": [
-        r"pay now", r"send money",
-        r"processing fee", r"registration fee",
-        r"पैसे भेजें", r"भुगतान करें"
-    ],
+
+  "Payment pressure": [
+    r"pay now", r"send money",
+    r"processing fee", r"registration fee",
+    r"पैसे भेजें", r"भुगतान करें",
+    r"फीस जमा", r"प्रोसेसिंग फीस",
+    r"पैसे जमा करें", r"शुल्क जमा"
+],
+
     "Prize or reward claim": [
         r"you have won", r"lottery", r"prize",
         r"claim.*reward", r"inaam", r"इनाम",
         r"लॉटरी", r"जीत"
     ],
-    "Suspicious link language": [
-        r"click.*link", r"verify.*link",
-        r"bit\.ly", r"tinyurl", r"http://",
-        r"लिंक पर क्लिक", r"लिंक खोलें"
-    ]
+"Suspicious link language": [
+    r"click.*link",
+    r"verify.*link",
+    r"link.*click",
+    r"link.*open",
+    r"bit\.ly",
+    r"tinyurl",
+    r"http://",
+    r"लिंक पर क्लिक",
+    r"लिंक खोलें",
+    r"लिंक.*क्लिक"
+],
 }
+
 
 EXPLANATIONS = {
-    "Urgency": "The message creates pressure to act quickly.",
-    "Sensitive information request": "The message mentions sensitive information such as OTPs, PINs or passwords.",
-    "Payment pressure": "The message appears to request money or payment.",
-    "Prize or reward claim": "The message mentions a prize or reward.",
-    "Suspicious link language": "The message contains link-related warning signs."
+    "Urgency": (
+        "The message creates pressure to act quickly. "
+        "Scammers may use urgency to stop people from checking information."
+    ),
+
+    "Sensitive information request": (
+        "The message mentions sensitive information such as OTPs, "
+        "PINs or passwords. Never share these with anyone."
+    ),
+
+    "Payment pressure": (
+        "The message appears to request money or payment. "
+        "Independently verify the request before paying."
+    ),
+
+    "Prize or reward claim": (
+        "The message mentions a prize or reward. "
+        "Unexpected prize claims can be used to trick people."
+    ),
+
+    "Suspicious link language": (
+        "The message contains link-related warning signs. "
+        "Avoid opening unexpected links."
+    )
 }
 
+
 def analyse_scam_dna(message):
+
+    message = message.lower()
+
     findings = []
     matched_phrases = {}
 
     for category, patterns in SCAM_PATTERNS.items():
+
         matches = []
 
         for pattern in patterns:
-            for match in re.finditer(pattern, message, re.IGNORECASE):
+
+            for match in re.finditer(pattern, message):
+
                 matches.append(match.group())
 
         if matches:
+
             findings.append(category)
-            matched_phrases[category] = list(set(matches))
+
+            matched_phrases[category] = list(
+                dict.fromkeys(matches)
+            )
 
     explanations = [
         {
@@ -67,3 +111,4 @@ def analyse_scam_dna(message):
         "explanations": explanations,
         "matched_phrases": matched_phrases
     }
+0
